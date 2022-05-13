@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\services\UserServices;
+use App\services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,11 +11,11 @@ use Illuminate\Http\Response;
 class UserController extends Controller
 {
 
-    protected UserServices $userServices;
+    protected UserService $userServices;
 
     public function  __construct()
     {
-        $this->userServices = new UserServices(new User());
+        $this->userServices = new UserService(new User());
     }
 
     /**
@@ -35,7 +35,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -57,7 +57,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $this->userServices = new UserServices($user);
+        $this->userServices = new UserService($user);
 
         return  $this->userServices->findOne();
     }
@@ -82,7 +82,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): JsonResponse
     {
-        $this->userServices = new UserServices($user);
+        $this->userServices = new UserService($user);
 
         return $this->userServices->update($request);
     }
@@ -95,7 +95,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
-        $this->userServices = new UserServices($user);
+        $this->userServices = new UserService($user);
 
         return  $this->userServices->remove();
     }
