@@ -37,7 +37,7 @@ Route::group(["prefix" => "/v1"],function (){
             ->middleware(["auth:sanctum"])->name("users.update");
 
         Route::delete("/{user}/delete",[UserController::class,"destroy"])
-            ->middleware(["auth:sanctum","is_admin"])->name("users.delete");
+            ->middleware(["auth:sanctum","is_admin","not_be_empty"])->name("users.delete");
 
     });
 

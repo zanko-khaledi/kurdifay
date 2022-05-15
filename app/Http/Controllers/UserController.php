@@ -81,7 +81,7 @@ class UserController extends Controller
      * @return JsonResponse
      * @throws AuthorizationException
      */
-    public function update(UserRequest $request, User $user): JsonResponse
+    public function update(Request $request, User $user): JsonResponse
     {
         $this->authorize("update",$user);
 
