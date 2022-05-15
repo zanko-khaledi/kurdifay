@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +16,7 @@ class UserController extends Controller
 
     public function  __construct()
     {
-        $this->userServices = new UserService(new User());
+        $this->userServices = new UserService();
     }
 
     /**
@@ -25,7 +26,7 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        return  $this->userServices->findAll();
+        return  $this->userServices->findAllUsers();
     }
 
     /**
@@ -57,9 +58,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $this->userServices = new UserService($user);
-
-        return  $this->userServices->findOne();
+        return  $this->userServices->findUsersById($user);
     }
 
     /**
@@ -80,11 +79,9 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return JsonResponse
      */
-    public function update(Request $request, User $user): JsonResponse
+    public function update(UserRequest $request, User $user): JsonResponse
     {
-        $this->userServices = new UserService($user);
-
-        return $this->userServices->update($request);
+        return $this->userServices->update($user,$request);
     }
 
     /**
@@ -95,8 +92,6 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
-        $this->userServices = new UserService($user);
-
-        return  $this->userServices->remove();
+        return  $this->userServices->delete($user);
     }
 }
