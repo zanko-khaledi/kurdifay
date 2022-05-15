@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use App\Services\UserService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -42,7 +43,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param UserRequest $request
      * @return JsonResponse
      */
     public function store(UserRequest $request): JsonResponse
@@ -76,11 +77,14 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function update(UserRequest $request, User $user): JsonResponse
     {
+        $this->authorize("update",$user);
+
         return $this->userServices->update($user,$request);
     }
 

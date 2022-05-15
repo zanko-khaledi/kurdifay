@@ -5,7 +5,7 @@ namespace App\Enums;
 enum Rules
 {
 
-    case ADMIN ;
+    case ADMIN;
 
     case USER;
 

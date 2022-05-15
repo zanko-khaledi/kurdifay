@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,11 +15,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
-
 
 Route::group(["prefix" => "/v1"],function (){
 
@@ -49,15 +43,20 @@ Route::group(["prefix" => "/v1"],function (){
 
     Route::group(["prefix" => "/categories","middleware" => "auth:sanctum"],function (){
 
-        Route::get("/",[CategoryController::class,"index"])->name("categories");
+        Route::get("/",[CategoryController::class,"index"])
+            ->middleware("is_admin")->name("categories");
 
-        Route::get("/{category}",[CategoryController::class,"show"])->name("categories.show");
+        Route::get("/{category}",[CategoryController::class,"show"])
+            ->middleware("is_admin")->name("categories.show");
 
-        Route::post("/create",[CategoryController::class,"store"])->name("categories.create");
+        Route::post("/create",[CategoryController::class,"store"])
+            ->middleware("is_admin")->name("categories.create");
 
-        Route::patch("/{category}/edit",[CategoryController::class,"update"])->name("categories.update");
+        Route::patch("/{category}/edit",[CategoryController::class,"update"])
+            ->middleware("is_admin")->name("categories.update");
 
-        Route::delete("/{category}/delete",[CategoryController::class,"destroy"])->name("categories.delete");
+        Route::delete("/{category}/delete",[CategoryController::class,"destroy"])
+            ->middleware("is_admin")->name("categories.delete");
     });
 
 });
