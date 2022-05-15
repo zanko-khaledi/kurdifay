@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +46,7 @@ class CategoryController extends Controller
      * @param CategoryService $request
      * @return JsonResponse
      */
-    public function store(CategoryService $request): JsonResponse
+    public function store(CategoryRequest $request): JsonResponse
     {
         return  $this->categoryService->createCategory($request);
     }
@@ -81,7 +82,7 @@ class CategoryController extends Controller
      */
     public function update(Category $category,Request $request): JsonResponse
     {
-        return  $this->categoryService->updateCategory($category->id,$request);
+        return  $this->categoryService->updateCategory($category,$request);
     }
 
     /**
@@ -92,6 +93,6 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category): JsonResponse
     {
-       return  $this->categoryService->deleteCategory($category->id);
+       return  $this->categoryService->deleteCategory($category);
     }
 }
