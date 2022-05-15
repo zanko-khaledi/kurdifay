@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -23,22 +24,30 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(["prefix" => "/v1"],function (){
 
+    Route::post("/login", LoginController::class)->name("login");
+
 
     Route::group(["prefix" => "/users"],function (){
 
-        Route::get("/",[UserController::class,"index"])->name("users");
+        Route::get("/",[UserController::class,"index"])
+            ->middleware("auth:sanctum")
+            ->name("users");
 
-        Route::get("/{user}",[UserController::class,"show"])->name("users.show");
+        Route::get("/{user}",[UserController::class,"show"])
+            ->middleware("auth:sanctum")->name("users.show");
 
-        Route::post("/create",[UserController::class,"store"])->name("users.create");
+        Route::post("/create",[UserController::class,"store"])
+            ->middleware(["auth:sanctum","is_admin"])->name("users.create");
 
-        Route::patch("/{user}/edit",[UserController::class,"update"])->name("users.update");
+        Route::patch("/{user}/edit",[UserController::class,"update"])
+            ->middleware(["auth:sanctum"])->name("users.update");
 
-        Route::delete("/{user}/delete",[UserController::class,"destroy"])->name("users.delete");
+        Route::delete("/{user}/delete",[UserController::class,"destroy"])
+            ->middleware(["auth:sanctum","is_admin"])->name("users.delete");
 
     });
 
-    Route::group(["prefix" => "/categories"],function (){
+    Route::group(["prefix" => "/categories","middleware" => "auth:sanctum"],function (){
 
         Route::get("/",[CategoryController::class,"index"])->name("users");
 

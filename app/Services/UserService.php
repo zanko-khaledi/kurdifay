@@ -42,17 +42,21 @@ class UserService implements IUsers
      */
     public function create(Request $request): JsonResponse
     {
+        try {
+            $user = $this->user::create([
+                "name" => $request->input("name"),
+                "email" => $request->input("email"),
+                "password" => Hash::make($request->input("password")),
+                "rules" => $request->input("rules")
+            ]);
 
-        $required = [
-            "name" => $request->input("name"),
-            "email" => $request->input("email"),
-            "password" => Hash::make($request->input("password")),
-            "rules" => $request->input("rules")
-        ];
+            return response()->json($user,Response::HTTP_CREATED);
 
-        $user = $this->user::create($required);
-
-        return response()->json($user,Response::HTTP_CREATED);
+        }catch (\PDOException $e){
+            return \response()->json([
+                "message" => "{$request->input('email')} was created before!",
+            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

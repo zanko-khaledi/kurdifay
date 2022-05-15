@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules;
+use App\Enums\Rules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use JetBrains\PhpStorm\ArrayShape;
@@ -24,14 +24,14 @@ class UserRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    #[ArrayShape(["name" => "string", "email" => "string", "password" => "string", "roles" => "array"])] public function rules(): array
+     #[ArrayShape(["name" => "string", "email" => "string", "password" => "string", "rules" => "array"])] public function rules(): array
     {
         return [
             "name" => "required | string",
             "email" => "required | email",
             "password" => "required",
-            "roles" => [
-                "required", Rule::in([ Rules::USER->getRules() , Rules::ADMIN->getRules()])
+            "rules" => [
+                "required" , Rule::in([Rules::ADMIN->getRules(),Rules::USER->getRules()])
             ]
         ];
     }

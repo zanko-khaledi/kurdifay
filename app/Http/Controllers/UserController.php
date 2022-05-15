@@ -14,9 +14,9 @@ class UserController extends Controller
 
     protected UserService $userServices;
 
-    public function  __construct()
+    public function  __construct(UserService $userServices)
     {
-        $this->userServices = new UserService();
+        $this->userServices =  $userServices;
     }
 
     /**
@@ -45,7 +45,7 @@ class UserController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(UserRequest $request): JsonResponse
     {
         return $this->userServices->create($request);
     }
