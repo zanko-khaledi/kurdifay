@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\services\CategoryService;
+use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,9 +12,10 @@ class CategoryController extends Controller
 
     protected CategoryService $categoryService;
 
+
     public function __construct()
     {
-        $this->categoryService = new CategoryService(new Category());
+        $this->categoryService = new CategoryService();
     }
 
     /**
@@ -24,7 +25,7 @@ class CategoryController extends Controller
      */
     public function index(): JsonResponse
     {
-       return  $this->categoryService->findAll();
+       return  $this->categoryService->findAllCategories();
     }
 
     /**
@@ -40,32 +41,30 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param CategoryService $request
      * @return JsonResponse
      */
     public function store(CategoryService $request): JsonResponse
     {
-        return  $this->categoryService->create($request);
+        return  $this->categoryService->createCategory($request);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Category  $category
+     * @param Category $category
      * @return JsonResponse
      */
     public function show(Category $category): JsonResponse
     {
-        $this->categoryService = new CategoryService($category);
-
-        return  $this->categoryService->findOne();
+        return  $this->categoryService->findById($category);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @param Category $category
+     * @return void
      */
     public function edit(Category $category)
     {
@@ -75,27 +74,23 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
+     * @param Request $request
+     * @param Category $category
      * @return JsonResponse
      */
-    public function update(Request $request, Category $category): JsonResponse
+    public function update(Category $category,Request $request): JsonResponse
     {
-        $this->categoryService = new CategoryService($category);
-
-        return  $this->categoryService->update($request);
+        return  $this->categoryService->updateCategory($category->id,$request);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Category  $category
+     * @param Category $category
      * @return JsonResponse
      */
     public function destroy(Category $category): JsonResponse
     {
-        $this->categoryService= new CategoryService($category);
-
-        return $this->categoryService->remove();
+       return  $this->categoryService->deleteCategory($category->id);
     }
 }
