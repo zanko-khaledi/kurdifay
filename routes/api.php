@@ -49,16 +49,15 @@ Route::group(["prefix" => "/v1"],function (){
 
     Route::group(["prefix" => "/categories","middleware" => "auth:sanctum"],function (){
 
-        Route::get("/",[CategoryController::class,"index"])->name("users");
+        Route::get("/",[CategoryController::class,"index"])->name("categories");
 
-        Route::get("/{category}",[CategoryController::class,"show"])->name("users.show");
+        Route::get("/{category}",[CategoryController::class,"show"])->name("categories.show");
 
-        Route::post("/create",[CategoryController::class,"store"])->name("users.create");
+        Route::post("/create",[CategoryController::class,"store"])->name("categories.create");
 
-        Route::patch("/{category}/edit",[CategoryController::class,"update"])->name("users.update");
+        Route::patch("/{category}/edit",[CategoryController::class,"update"])->name("categories.update");
 
-        Route::delete("/{category}/delete",[CategoryController::class,"destroy"])->name("users.delete");
-
+        Route::delete("/{category}/delete",[CategoryController::class,"destroy"])->name("categories.delete");
     });
 
 });
