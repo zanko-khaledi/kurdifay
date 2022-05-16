@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubcateoryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,4 +60,20 @@ Route::group(["prefix" => "/v1"],function (){
             ->middleware("is_admin")->name("categories.delete");
     });
 
+    Route::group(["prefix" => "/sub_categories","middleware" => "auth:sanctum"],function (){
+         Route::get("/",[SubcateoryController::class,"index"])
+             ->middleware("is_admin")->name("sub_categories");
+
+         Route::get("/{subcategory}",[SubcateoryController::class,"show"])
+             ->middleware("is_admin")->name("sub_categories.show");
+
+         Route::post("/create",[SubcateoryController::class,"store"])
+             ->middleware("is_admin")->name("sub_categories.create");
+
+         Route::patch("/{subcategory}/edit",[SubcateoryController::class,"update"])
+             ->middleware("is_admin")->name("sub_categories.update");
+
+         Route::delete("/{subcategory}/delete",[SubcateoryController::class,"destroy"])
+             ->middleware("is_admin")->name("sub_categories.delete");
+    });
 });
