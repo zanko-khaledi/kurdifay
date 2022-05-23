@@ -11,11 +11,16 @@ class Subcategory extends Model
     use HasFactory;
 
     protected $fillable=[
-        "category_id","title","description","slug"
+        "category_id","title","description","slug","img"
     ];
 
     public function categories(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }

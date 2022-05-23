@@ -17,4 +17,9 @@ class Post extends Model
     {
         return $this->hasOne(Song::class);
     }
+
+    public function subcategories()
+    {
+        return $this->belongsTo(Subcategory::class);
+    }
 }

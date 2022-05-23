@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string("title",128);
             $table->text("desc");
             $table->string("slug",128);
-            $table->string("artist",128);
+            $table->string("artist",128)->nullable(true);
             $table->enum("entity",[Entities::SONG->getEntity(),Entities::BLOG->getEntity(),Entities::ABOUT_US->getEntity(),Entities::PODCAST->getEntity()])
                 ->default(Entities::SONG->getEntity());
             $table->string("img",128)->nullable(true);

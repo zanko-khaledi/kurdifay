@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Events\FileUploader;
 use App\Interfaces\ISubcategory;
 use App\Models\Category;
 use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 
 class SubcategoryService implements ISubcategory
 {
@@ -50,7 +53,8 @@ class SubcategoryService implements ISubcategory
              $subcategory_created = $category->subCategories()->create([
                 "title" => $request->input("title"),
                 "description" => $request->input("description"),
-                "slug" => $request->input("slug")
+                "slug" => $request->input("slug"),
+                "img" => $request->has("img") ? FileUploader::dispatch($request)[0] : null
             ]);
 
             return response()->json($subcategory_created,Response::HTTP_CREATED);
@@ -68,12 +72,19 @@ class SubcategoryService implements ISubcategory
      */
     public function updateSubcategory(Subcategory $subcategory, Request $request): JsonResponse
     {
+
         $subcategory->update([
             "category_id" => $request->input('category_id') ?? $subcategory->category_id,
             "title" => $request->input("title") ?? $subcategory->title,
             "description" => $request->input("description") ?? $subcategory->description,
-            "slug" => $request->input("slug") ?? $subcategory->slug
+            "slug" => $request->input("slug") ?? $subcategory->slug,
+            "img" => $request->has("img") ? FileUploader::dispatch($request)[0] : $subcategory->img
         ]);
+
+        $file_name = public_path("/files/".last(explode("/",$subcategory->img)));
+
+        $request->has("img") && File::exists($file_name) && File::delete($file_name);
+
 
         return \response()->json([
             "subcategory" => $subcategory,
@@ -87,7 +98,13 @@ class SubcategoryService implements ISubcategory
      */
     public function deleteSubcategory(Subcategory $subcategory): JsonResponse
     {
+
+        $file_name = public_path("/files/".last(explode("/",$subcategory->img)));
+
+        File::exists($file_name) && File::delete($file_name);
+
         $subcategory->delete();
+
 
         return \response()->json([
             "subcategory" => $subcategory,

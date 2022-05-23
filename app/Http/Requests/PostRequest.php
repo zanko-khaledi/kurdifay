@@ -28,17 +28,14 @@ class PostRequest extends FormRequest
     {
         return [
             "subcategory_id" => "required",
-            "title" => ["required","string"],
-            "desc" => ["nullable","string"],
-            "slug" => ["required","string"],
-            "img" => "nullable | mimes:jpg,jpeg,png,gif | max : 6000",
+            "title" => "required",
+            "desc" => "nullable | string",
+            "slug" => "nullable | string",
+            'entity' => "required | ".Rule::in([Entities::SONG->getEntity(),Entities::BLOG->getEntity(),
+                    Entities::ABOUT_US->getEntity(),Entities::PODCAST->getEntity()]),
             "artist" => "nullable | string",
-            "entity" => [
-                "nullable",
-                Rule::in([Entities::SONG->getEntity(),Entities::BLOG->getEntity(),Entities::PODCAST->getEntity(),Entities::ABOUT_US->getEntity()])
-            ],
-            "lyric" => ["nullable","string"],
-            "src" => "nullable | mimes:mp3,mp4"
+            "img" => "nullable | file | mimes:jpg,jpeg,png,gif | max : 6000",
+            "song" => "nullable | file | mimes : mp3,mp4"
         ];
     }
 }

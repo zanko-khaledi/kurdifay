@@ -5,17 +5,21 @@ namespace App\Services;
 use App\Enums\Entities;
 use App\Events\FileUploader;
 use App\Events\SongUploader;
+use App\Interfaces\IPosts;
 use App\Models\Post;
 use App\Models\Song;
 use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\Response;
 
-class PostService implements \App\Interfaces\IPosts
+class PostService implements IPosts
 {
 
     protected Post $post;
+
+    protected const  PAGE_SIZE = 15;
 
     public function __construct(Post $post)
     {
@@ -27,7 +31,44 @@ class PostService implements \App\Interfaces\IPosts
      */
     public function getAllPosts(): JsonResponse
     {
-        return response()->json($this->post::all());
+        $post = $this->post::with("song")->orderBy("created_at",request()->get("sort") ?? "asc")
+            ->paginate(self::PAGE_SIZE);
+
+
+        if(\request()->has(["title","artist"])){
+            $with_titles = $this->post::with("song")->where("title","LIKE","%".\request()->get("title")."%")
+                ->orderBy("created_at",\request()->get("sort") ?? "asc")
+                ->get();
+
+            $with_aritsts = $this->post::with("song")->where("artist","LIKE","%".\request()->get("artist")."%")
+                ->orderBy("created_at",\request()->get("sort") ?? "asc")
+                ->get();
+
+            $post =[...$with_aritsts,...$with_titles];
+
+        }else{
+            if(request()->has("title")){
+                $title = request()->get("title");
+                $post = $this->post::with("song")->where("title","LIKE","%".$title."%")
+                ->orderBy("created_at",\request()->has("sort") ? \request()->get("sort") : "asc")
+                ->get();
+            }
+
+            if (request()->has("artist")){
+                $artist = request()->get("artist");
+                $post = $this->post::with("song")->where( "artist","LIKE","%".$artist."%")
+                    ->orderBy("created_at",\request()->has("sort") ? \request()->get("sort") : "asc")
+                    ->get();
+            }
+
+            if(request()->has("slug")){
+                $slug = request()->get("slug");
+                $post = $this->post::with("song")->where("slug","LIKE","%".$slug."%")
+                    ->get();
+            }
+        }
+
+        return \response()->json($post);
     }
 
     /**
@@ -36,7 +77,7 @@ class PostService implements \App\Interfaces\IPosts
      */
     public function findPostById(Post $post): JsonResponse
     {
-        return response()->json($post);
+        return response()->json($post->load("song"));
     }
 
     /**
@@ -45,49 +86,30 @@ class PostService implements \App\Interfaces\IPosts
      */
     public function create(Request $request): JsonResponse
     {
-        $subcategory = Subcategory::all()->find($request->input("subcategory_id"))->first();
+        $subcategory = Subcategory::find($request->input("subcategory_id"));
 
         if($subcategory){
-            if($request->input("entity") === Entities::SONG->getEntity()){
 
-                $post = $this->post->create([
-                    "subcategory_id" => $subcategory->id,
-                    "title" => $request->input("title"),
-                    "desc" => $request->input("desc"),
-                    "slug" => $request->input("slug"),
-                    "lyric" => $request->input("lyric"),
-                    "img" => FileUploader::dispatch($request)[0],
-                    "artist" => $request->input("artist"),
-                    "entity" => $request->input("entity"),
-                ]);
+            $post  = Post::create([
+                "subcategory_id" => $subcategory->id,
+                "title" => $request->input("title"),
+                "desc" => $request->input("desc"),
+                "slug" => $request->input("slug"),
+                "entity" => $request->input('entity'),
+                "artist" => $request->input('artist'),
+                "lyric" => $request->input("lyric"),
+                "img" => $request->has("img") ?  FileUploader::dispatch($request)[0] : null,
+            ]);
 
-                $post && Song::create([
-                    "post_id" => $post->id,
-                    "src" => SongUploader::dispatch($request)[0]
-                ]);
+            $post && $request->input("entity") === Entities::SONG->getEntity() && $post->song()->create([
+                "src" => SongUploader::dispatch($request)[0]
+            ]);
 
-                return response()->json([
-                    "post" => $this->post::with("song")->where("id",$post->id)->first(),
-                    "created" => true
-                ],Response::HTTP_CREATED);
+            return \response()->json([
+                "post" => $post->load("song"),
+                "created" => true
+            ],Response::HTTP_CREATED);
 
-            }else{
-                $post = $this->post->create([
-                    "subcategory_id" => $subcategory->id,
-                    "title" => $request->input("title"),
-                    "desc" => $request->input("desc"),
-                    "slug" => $request->input("slug"),
-                    "lyric" => $request->input("lyric"),
-                    "img" => $request->has("img") ? FileUploader::dispatch($request)[0] : null,
-                    "entity" => $request->input("entity"),
-                    "artist" => $request->input("artist"),
-                ]);
-
-                return \response()->json([
-                    "post" => $post,
-                    "created" => true
-                ],Response::HTTP_CREATED);
-            }
         }else{
             return \response()->json([
                 "message" => "Subcategory with id {$subcategory->id} not founded!"
@@ -102,43 +124,35 @@ class PostService implements \App\Interfaces\IPosts
      */
     public function update(Post $post, Request $request): JsonResponse
     {
-        if($request->has("src")){
-            $post_updated = $post->update([
-                "subcategory_id" => $request->input("subcategory_id") ?? $post->subcategory_id,
-                "title" => $request->input("title") ?? $post->title,
-                "desc" => $request->input("desc") ?? $post->desc,
-                "slug" => $request->input("slug") ?? $post->slug,
-                "artist" => $request->input("artist") ?? $post->artist,
-                "entity" => $request->input("entity") ?? $post->entity,
-                "lyric" => $request->input("lyric") ?? $post->lyric,
-                "img" => FileUploader::dispatch($request) ?? $post->img,
-            ]);
+        $post->subcategory_id = $request->subcategory_id ?? $post->subcategory_id;
+        $post->title = $request->title ?? $post->title;
+        $post->desc = $request->desc ?? $post->desc;
+        $post->artist = $request->artist ?? $post->artist;
+        $post->slug = $request->slug ?? $post->slug;
+        $post->lyric = $request->lyric ?? $post->lyric;
+        $post->img = $request->has("img") ?
+            FileUploader::dispatch($request)[0]
+            &&
+            File::exists( public_path("/files/".last(explode("/",$post->img))))
+            &&
+            File::delete( public_path("/files/".last(explode("/",$post->img))))
+            : $post->img;
+        $post->song()->update([
+            "src" => $request->has("src") ?
+                SongUploader::dispatch($request)[0]
+                &&
+                File::exists(public_path("/songs/".last(explode("/",$post->song->src))))
+                &&
+                File::delete(public_path("/songs/".last(explode("/",$post->song->src))))
+                : $post->song->src
+        ]);
 
-            $post_updated->song()->update([
-                "src" => SongUploader::dispatch($request) ?? $post->song()->src
-            ]);
+        $post->save();
 
-            return \response()->json([
-                "post" => $post_updated,
-                "updated" => true
-            ],Response::HTTP_OK);
-        }else{
-            $post_updated = $post->update([
-                "subcategory_id" => $request->input("subcategory_id") ?? $post->subcategory_id,
-                "title" => $request->input("title") ?? $post->title,
-                "desc" => $request->input("desc") ?? $post->desc,
-                "slug" => $request->input("slug") ?? $post->slug,
-                "artist" => $request->input("artist") ?? $post->artist,
-                "entity" => $request->input("entity") ?? $post->entity,
-                "lyric" => $request->input("lyric") ?? $post->lyric,
-                "img" => FileUploader::dispatch($request) ?? $post->img,
-            ]);
-
-            return \response()->json([
-                "post" => $post_updated,
-                "updated" => true
-            ]);
-        }
+        return \response()->json([
+            "post" => $post,
+            "updated" => true
+        ]);
     }
 
     /**
@@ -147,11 +161,19 @@ class PostService implements \App\Interfaces\IPosts
      */
     public function delete(Post $post): JsonResponse
     {
+
+        $img_name = public_path("/files/".last(explode("/",$post->img)));
+        File::exists($img_name) && File::delete($img_name);
+
+        if($post->load("song")->src !== null){
+            $song_name = public_path("/songs/".last(explode("/",$post->song->src)));
+            File::exists($song_name) && File::delete($song_name);
+        }
+
         $post->delete();
 
         return \response()->json([
-            "deleted" => true,
-            "post" => $post
-        ],Response::HTTP_OK);
+            "deleted" => true
+        ]);
     }
 }

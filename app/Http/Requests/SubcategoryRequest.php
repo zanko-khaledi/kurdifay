@@ -28,7 +28,8 @@ class SubcategoryRequest extends FormRequest
             "category_id" => "required",
             "title" => "required",
             "description" => "required",
-            "slug" => "required"
+            "slug" => "required",
+            "img" => "nullable | mimes : jpeg,jpg,png,gif | max: 6000"
         ];
     }
 }
