@@ -35,7 +35,8 @@ class PostRequest extends FormRequest
                     Entities::ABOUT_US->getEntity(),Entities::PODCAST->getEntity()]),
             "artist" => "nullable | string",
             "img" => "nullable | file | mimes:jpg,jpeg,png,gif | max : 6000",
-            "song" => "nullable | file | mimes : mp3,mp4"
+            "song" => "nullable | file | mimes : mp3,mp4",
+            "tags" => "nullable | array"
         ];
     }
 }

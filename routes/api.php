@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\SubcateoryController;
+use App\Http\Controllers\TagsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,4 +82,7 @@ Route::group(["prefix" => "/v1"],function (){
 
     Route::middleware(["auth:sanctum","is_admin"])
         ->resource("posts", PostsController::class);
+
+    Route::middleware(["auth:sanctum","is_admin"])
+        ->resource("tags", TagsController::class);
 });

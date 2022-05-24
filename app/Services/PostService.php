@@ -9,6 +9,7 @@ use App\Interfaces\IPosts;
 use App\Models\Post;
 use App\Models\Song;
 use App\Models\Subcategory;
+use App\Models\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -105,6 +106,14 @@ class PostService implements IPosts
                 "src" => SongUploader::dispatch($request)[0]
             ]);
 
+            if($request->has("tags")){
+                $tags = array_map(fn($tag)=> [
+                    "name" => $tag
+                ],$request->input("tags"));
+
+                $post && $request->has("tags") && $post->tags()->createMany($tags);
+            }
+
             return \response()->json([
                 "post" => $post->load("song"),
                 "created" => true
@@ -146,6 +155,12 @@ class PostService implements IPosts
                 File::delete(public_path("/songs/".last(explode("/",$post->song->src))))
                 : $post->song->src
         ]);
+
+        $request->has("tags_id")
+        &&
+        is_array($request->input("tags_id"))
+        &&
+        $post->tags()->sync($request->input("tags_id"));
 
         $post->save();
 

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Song;
 use App\Models\Subcategory;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Testing\File;
@@ -43,6 +44,8 @@ class PostsTest extends TestCase
         $this->subcategory = Subcategory::factory()->count(3)->create([
             "category_id" => $this->category->id
         ]);
+
+        Tag::factory()->count(10)->create();
 
         $image = File::fake()->create("avatar.jpg")
             ->move(public_path("/files"),"avatar_".Str::random().".jpg");
@@ -129,6 +132,9 @@ class PostsTest extends TestCase
             'entity' => Entities::SONG->getEntity(),
             "slug" => "php",
             'artist' => "php",
+            "tags" => [
+                "zanko","teddy"
+            ],
             "lyric" => Str::random(),
             "img" => UploadedFile::fake()->create("avatar.jpg"),
             "src" => UploadedFile::fake()->create("avatar.mp3")
@@ -140,6 +146,14 @@ class PostsTest extends TestCase
 
         $this->assertDatabaseHas("posts",[
             "title" => "php"
+        ]);
+
+        $this->assertDatabaseHas("post_tag",[
+            "post_id" => 4
+        ]);
+
+        $this->assertDatabaseHas("tags",[
+            "name" => "zanko"
         ]);
     }
 
@@ -157,7 +171,10 @@ class PostsTest extends TestCase
             "title" => "Teddy",
             "desc" => Str::random(),
             "img" => UploadedFile::fake()->create("Teddy.jpg"),
-            "src" => UploadedFile::fake()->create("Teddy.mp3")
+            "src" => UploadedFile::fake()->create("Teddy.mp3"),
+            "tags_id" => [
+                1,4,5
+            ]
         ])->assertOk()->assertJson([
             "updated" => true
         ])->json();
@@ -167,6 +184,8 @@ class PostsTest extends TestCase
             "title" => $response["post"]["title"],
             "img" => $response["post"]["img"]
         ]);
+
+
     }
 
 
