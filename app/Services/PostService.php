@@ -146,7 +146,7 @@ class PostService implements IPosts
             &&
             File::delete( public_path("/files/".last(explode("/",$post->img))))
             : $post->img;
-        $post->song()->update([
+        $request->has("src") ? $post->song()->update([
             "src" => $request->has("src") ?
                 SongUploader::dispatch($request)[0]
                 &&
@@ -154,7 +154,7 @@ class PostService implements IPosts
                 &&
                 File::delete(public_path("/songs/".last(explode("/",$post->song->src))))
                 : $post->song->src
-        ]);
+        ]) : '';
 
         $request->has("tags_id")
         &&

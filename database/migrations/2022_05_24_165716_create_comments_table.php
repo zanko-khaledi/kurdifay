@@ -21,7 +21,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
             $table->string("email","128")->unique();
             $table->string("name",128);
-            $table->boolean("statue")->default(0);
+            $table->boolean("status")->default(0);
             $table->text("comment");
             $table->timestamps();
         });

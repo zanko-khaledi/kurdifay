@@ -53,13 +53,13 @@ class PostsTest extends TestCase
         $song_file  = File::fake()->create("song.mp3")
             ->move(public_path("/songs"),"avatar_".Str::random().".mp3");
 
-        $this->post= Post::factory()->count(3)->create([
-            "subcategory_id" => $this->subcategory[0]->id,
+        $this->post= Post::factory()->count(10)->create([
+            "subcategory_id" => Subcategory::all()->first()->id,
             "img" => $image
         ]);
 
         $this->song = Song::factory()->count(3)->create([
-            "post_id" => $this->post[0]->id,
+            "post_id" => Post::all()->first()->id,
             "src" => $song_file
         ]);
 
@@ -125,7 +125,7 @@ class PostsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $this->postJson(route('posts.store'),[
+        $response = $this->postJson(route('posts.store'),[
             "subcategory_id" => $this->subcategory[0]->id,
             "title" => "php",
             "desc" => Str::random(),
@@ -145,11 +145,11 @@ class PostsTest extends TestCase
         ])->json();
 
         $this->assertDatabaseHas("posts",[
-            "title" => "php"
+            "title" => $response["post"]["title"]
         ]);
 
         $this->assertDatabaseHas("post_tag",[
-            "post_id" => 4
+            "post_id" => $response["post"]["id"]
         ]);
 
         $this->assertDatabaseHas("tags",[
@@ -165,16 +165,21 @@ class PostsTest extends TestCase
 
         $this->withoutExceptionHandling();
 
+        $tags = Tag::factory()->count(20)->create();
+
+
         $response = $this->patch(route("posts.update",[
             "post" => $this->post[0]->id
         ]),[
             "title" => "Teddy",
             "desc" => Str::random(),
             "img" => UploadedFile::fake()->create("Teddy.jpg"),
-            "src" => UploadedFile::fake()->create("Teddy.mp3"),
             "tags_id" => [
-                1,4,5
-            ]
+               $tags[0]->id,
+               $tags[5]->id,
+               $tags[6]->id
+            ],
+            "src" => UploadedFile::fake()->create("Teddy.mp3")
         ])->assertOk()->assertJson([
             "updated" => true
         ])->json();
@@ -184,7 +189,6 @@ class PostsTest extends TestCase
             "title" => $response["post"]["title"],
             "img" => $response["post"]["img"]
         ]);
-
 
     }
 

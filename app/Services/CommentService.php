@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Enums\CommentType;
+use App\Interfaces\IComment;
 use App\Models\Comment;
+use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CommentService implements \App\Interfaces\IComment
+class CommentService implements IComment
 {
 
     protected Comment $comment;
@@ -63,7 +65,9 @@ class CommentService implements \App\Interfaces\IComment
             }
         }else{
 
-            $created = $this->comment::create([
+            $post = Post::find($request->post_id);
+
+            $created = $post->comment()->create([
                 "name" => $request->name,
                 "email" => $request->email,
                 "comment" => $request->comment
@@ -74,7 +78,7 @@ class CommentService implements \App\Interfaces\IComment
         return response()->json([
             "comment" => $this->comment,
             "created" => $created
-        ]);
+        ],Response::HTTP_CREATED);
     }
 
     /**
@@ -99,6 +103,7 @@ class CommentService implements \App\Interfaces\IComment
         }
 
         return \response()->json([
+            "comment" => $comment,
             "updated" => $updated
         ],Response::HTTP_OK);
     }
