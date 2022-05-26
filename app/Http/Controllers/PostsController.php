@@ -42,7 +42,7 @@ class PostsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param PostRequest $request
      * @return JsonResponse
      */
     public function store(PostRequest $request): JsonResponse
