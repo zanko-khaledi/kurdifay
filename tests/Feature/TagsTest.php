@@ -51,7 +51,7 @@ class TagsTest extends TestCase
         $this->withoutExceptionHandling();
 
         $response = $this->get(route("tags.show",[
-            "tag" => 1
+            "tag" => Tag::all()->first()->id
         ]))->assertOk()->json();
 
         $this->assertEquals($this->tags[0]->name,$response["name"]);
@@ -103,8 +103,7 @@ class TagsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-
-        $tag = Tag::find(3);
+        $tag = Tag::all()->first();
 
         $this->deleteJson(route("tags.destroy",[
             "tag" => $tag->id

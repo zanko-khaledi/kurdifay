@@ -63,7 +63,6 @@ class PostsTest extends TestCase
             "src" => $song_file
         ]);
 
-
     }
 
     /**
@@ -125,7 +124,8 @@ class PostsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $this->postJson(route('posts.store'),[
+
+        $response = $this->postJson(route('posts.store'),[
             "subcategory_id" => $this->subcategory[0]->id,
             "title" => "php",
             "desc" => Str::random(),
@@ -133,7 +133,7 @@ class PostsTest extends TestCase
             "slug" => "php",
             'artist' => "php",
             "tags" => [
-                "zanko","teddy"
+                "zanko","milad"
             ],
             "lyric" => Str::random(),
             "img" => UploadedFile::fake()->create("avatar.jpg"),
@@ -144,12 +144,9 @@ class PostsTest extends TestCase
             "created" => true
         ])->json();
 
-        $this->assertDatabaseHas("posts",[
-            "title" => "php"
-        ]);
 
-        $this->assertDatabaseHas("post_tag",[
-            "post_id" => 4
+        $this->assertDatabaseHas("posts",[
+            "title" => $response["post"]["title"]
         ]);
 
         $this->assertDatabaseHas("tags",[
@@ -166,12 +163,12 @@ class PostsTest extends TestCase
         $this->withoutExceptionHandling();
 
         $response = $this->patch(route("posts.update",[
-            "post" => $this->post[0]->id
+            "post" => Post::all()->first()->id
         ]),[
             "title" => "Teddy",
             "desc" => Str::random(),
-            "img" => UploadedFile::fake()->create("Teddy.jpg"),
-            "src" => UploadedFile::fake()->create("Teddy.mp3"),
+            "img" => UploadedFile::fake()->create("Teddy.updated.jpg"),
+            "src" => UploadedFile::fake()->create("Teddy.updated.mp3"),
             "tags_id" => [
                 1,4,5
             ]
@@ -184,7 +181,6 @@ class PostsTest extends TestCase
             "title" => $response["post"]["title"],
             "img" => $response["post"]["img"]
         ]);
-
 
     }
 

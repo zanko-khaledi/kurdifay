@@ -4,9 +4,7 @@ namespace App\Services;
 
 use App\Interfaces\IPosts;
 use App\Models\Post;
-use App\Models\Song;
 use App\Models\Subcategory;
-use App\Models\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -84,7 +82,6 @@ class PostService implements IPosts
      */
     public function create(Request $request): JsonResponse
     {
-
         $subcategory = Subcategory::find($request->input("subcategory_id"));
 
         if ($subcategory) {
@@ -99,16 +96,15 @@ class PostService implements IPosts
                 "img" => $request->has("img") ? FileUploader::img($request) : null
             ]);
 
+            $request->has("tags") && $post->tags()->createMany(array_map(fn($tag)=> [
+                "name" => $tag
+            ],$request->tags));
+
             $request->has("src") && $post->song()->create([
                 "src" => FileUploader::song($request)
             ]);
 
-            $request->has("tags") && $tags = array_map(fn($tag) => [
-                "name" => $tag
-            ], $request->tags);
 
-
-            $request->has("tags") && $post->tags()->createMany($tags);
 
             return $post ?
                 \response()->json([
@@ -133,41 +129,29 @@ class PostService implements IPosts
      */
     public function update(Post $post, Request $request): JsonResponse
     {
-        $post->subcategory_id = $request->subcategory_id ?? $post->subcategory_id;
-        $post->title = $request->title ?? $post->title;
-        $post->desc = $request->desc ?? $post->desc;
-        $post->artist = $request->artist ?? $post->artist;
-        $post->slug = $request->slug ?? $post->slug;
-        $post->lyric = $request->lyric ?? $post->lyric;
-        $post->img = $request->has("img") ?
-            FileUploader::dispatch($request)[0]
-            &&
-            File::exists(public_path("/files/" . last(explode("/", $post->img))))
-            &&
-            File::delete(public_path("/files/" . last(explode("/", $post->img))))
-            : $post->img;
-        $post->song()->update([
-            "src" => $request->has("src") ?
-                SongUploader::dispatch($request)[0]
-                &&
-                File::exists(public_path("/songs/" . last(explode("/", $post->song->src))))
-                &&
-                File::delete(public_path("/songs/" . last(explode("/", $post->song->src))))
-                : $post->song->src
-        ]);
 
-        $request->has("tags_id")
-        &&
-        is_array($request->input("tags_id"))
-        &&
-        $post->tags()->sync($request->input("tags_id"));
+             $post->update([
+                 "title" => $request->title ?? $post->title,
+                 "desc" => $request->desc ?? $post->desc,
+                 "slug" => $request->slug ?? $post->slug,
+                 "artist" => $request->artist ?? $post->artist,
+                 "entity" => $request->entity ?? $post->entity,
+                 "img" => $request->has("img") ? FileUploader::img($request) : $post->img
+             ]);
 
-        $post->save();
+             $post->song()->update([
+                 "src" => $request->has("src") ? FileUploader::song($request) : $post->song->src
+             ]);
 
-        return \response()->json([
-            "post" => $post,
-            "updated" => true
-        ]);
+             if($request->has("tags") && is_array($request->tags)){
+                 $post->tags()->sync($request->tags);
+             }
+
+             return \response()->json([
+                 "post" => $post->load(["song","tags"]),
+                 "updated" => true
+             ],Response::HTTP_OK);
+
     }
 
     /**

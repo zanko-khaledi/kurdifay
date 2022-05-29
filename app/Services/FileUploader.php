@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 class FileUploader implements IFile
 {
 
+    /**
+     * @param Request $request
+     * @return string|null
+     */
     public static function img(Request $request): ?string
     {
         $title = $request->title;
@@ -20,6 +24,10 @@ class FileUploader implements IFile
             asset("/files/".$file_name) : null;
     }
 
+    /**
+     * @param Request $request
+     * @return string|null
+     */
     public static function song(Request $request): ?string
     {
         $title = $request->title;
