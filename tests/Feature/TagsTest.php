@@ -103,7 +103,10 @@ class TagsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> refactor
         $tag = Tag::all()->first();
 
         $this->deleteJson(route("tags.destroy",[

@@ -63,7 +63,6 @@ class PostsTest extends TestCase
             "src" => $song_file
         ]);
 
-
     }
 
     /**
@@ -125,6 +124,10 @@ class PostsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> refactor
         $response = $this->postJson(route('posts.store'),[
             "subcategory_id" => $this->subcategory[0]->id,
             "title" => "php",
@@ -133,7 +136,7 @@ class PostsTest extends TestCase
             "slug" => "php",
             'artist' => "php",
             "tags" => [
-                "zanko","teddy"
+                "zanko","milad"
             ],
             "lyric" => Str::random(),
             "img" => UploadedFile::fake()->create("avatar.jpg"),
@@ -144,12 +147,18 @@ class PostsTest extends TestCase
             "created" => true
         ])->json();
 
+<<<<<<< HEAD
         $this->assertDatabaseHas("posts",[
             "title" => $response["post"]["title"]
         ]);
 
         $this->assertDatabaseHas("post_tag",[
             "post_id" => $response["post"]["id"]
+=======
+
+        $this->assertDatabaseHas("posts",[
+            "title" => $response["post"]["title"]
+>>>>>>> refactor
         ]);
 
         $this->assertDatabaseHas("tags",[
@@ -169,11 +178,16 @@ class PostsTest extends TestCase
 
 
         $response = $this->patch(route("posts.update",[
-            "post" => $this->post[0]->id
+            "post" => Post::all()->first()->id
         ]),[
             "title" => "Teddy",
             "desc" => Str::random(),
+<<<<<<< HEAD
             "img" => UploadedFile::fake()->create("Teddy.jpg"),
+=======
+            "img" => UploadedFile::fake()->create("Teddy.updated.jpg"),
+            "src" => UploadedFile::fake()->create("Teddy.updated.mp3"),
+>>>>>>> refactor
             "tags_id" => [
                $tags[0]->id,
                $tags[5]->id,
