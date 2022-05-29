@@ -28,7 +28,7 @@ class SubCategoryTest extends TestCase
 
         $category = Category::factory()->create();
 
-        $subcategory = Subcategory::factory()->create([
+         Subcategory::factory()->create([
             "category_id" => $category->id,
         ]);
 

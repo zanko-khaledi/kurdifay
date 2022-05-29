@@ -38,7 +38,6 @@ class PostsTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
 
 
-
         $this->category = Category::factory()->create();
 
         $this->subcategory = Subcategory::factory()->count(3)->create([
@@ -70,9 +69,6 @@ class PostsTest extends TestCase
      */
     public function get_all_posts_test()
     {
-
-
-
         $response = $this->get(route("posts.index"))
             ->assertOk()->json();
 
@@ -124,11 +120,7 @@ class PostsTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-<<<<<<< HEAD
-=======
-
->>>>>>> refactor
-        $response = $this->postJson(route('posts.store'),[
+       $this->postJson(route('posts.store'),[
             "subcategory_id" => $this->subcategory[0]->id,
             "title" => "php",
             "desc" => Str::random(),
@@ -146,20 +138,6 @@ class PostsTest extends TestCase
             ->assertJson([
             "created" => true
         ])->json();
-
-<<<<<<< HEAD
-        $this->assertDatabaseHas("posts",[
-            "title" => $response["post"]["title"]
-        ]);
-
-        $this->assertDatabaseHas("post_tag",[
-            "post_id" => $response["post"]["id"]
-=======
-
-        $this->assertDatabaseHas("posts",[
-            "title" => $response["post"]["title"]
->>>>>>> refactor
-        ]);
 
         $this->assertDatabaseHas("tags",[
             "name" => "zanko"
@@ -182,12 +160,6 @@ class PostsTest extends TestCase
         ]),[
             "title" => "Teddy",
             "desc" => Str::random(),
-<<<<<<< HEAD
-            "img" => UploadedFile::fake()->create("Teddy.jpg"),
-=======
-            "img" => UploadedFile::fake()->create("Teddy.updated.jpg"),
-            "src" => UploadedFile::fake()->create("Teddy.updated.mp3"),
->>>>>>> refactor
             "tags_id" => [
                $tags[0]->id,
                $tags[5]->id,
