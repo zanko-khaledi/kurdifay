@@ -109,4 +109,27 @@ class CommentTest extends TestCase
 
         $this->assertEquals(Comment::all()->first()->status,$response["comment"]["status"]);
     }
+
+    /**
+     * @test
+     */
+    public function delete_comment_test()
+    {
+
+        Sanctum::actingAs(User::factory()->create(),["admin:*"]);
+
+       $comment =   Comment::all()->first()->id;
+
+       $this->delete(route("comments.destroy",[
+           "comment" => $comment
+       ]))->assertOk()->assertJson([
+           "deleted" => true
+       ])->json();
+
+
+       $this->assertDatabaseMissing("comments",[
+           "id" => $comment
+       ]);
+    }
+
 }

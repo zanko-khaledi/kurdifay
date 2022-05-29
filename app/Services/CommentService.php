@@ -114,7 +114,6 @@ class CommentService implements IComment
      */
     public function delete(Comment $comment): JsonResponse
     {
-
         $comment->delete();
 
         return \response()->json([

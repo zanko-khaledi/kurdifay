@@ -82,11 +82,13 @@ Route::group(["prefix" => "/v1"],function (){
     });
 
 
+
     Route::middleware(["auth:sanctum","is_admin"])
         ->resource("posts", PostsController::class);
 
     Route::middleware(["auth:sanctum","is_admin"])
         ->resource("tags", TagsController::class);
 
-    Route::resource("comments", CommentsController::class);
+    Route::resource("comments",CommentsController::class);
+
 });
