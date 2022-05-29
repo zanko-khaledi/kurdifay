@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\FileUploader;
 use App\Interfaces\ISubcategory;
 use App\Models\Category;
 use App\Models\Subcategory;
@@ -10,7 +9,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 
 class SubcategoryService implements ISubcategory
 {
@@ -54,7 +52,7 @@ class SubcategoryService implements ISubcategory
                 "title" => $request->input("title"),
                 "description" => $request->input("description"),
                 "slug" => $request->input("slug"),
-                "img" => $request->has("img") ? FileUploader::dispatch($request)[0] : null
+                "img" => $request->has("img") ? FileUploader::img($request) : null
             ]);
 
             return response()->json($subcategory_created,Response::HTTP_CREATED);
@@ -78,7 +76,7 @@ class SubcategoryService implements ISubcategory
             "title" => $request->input("title") ?? $subcategory->title,
             "description" => $request->input("description") ?? $subcategory->description,
             "slug" => $request->input("slug") ?? $subcategory->slug,
-            "img" => $request->has("img") ? FileUploader::dispatch($request)[0] : $subcategory->img
+            "img" => $request->has("img") ? FileUploader::img($request) : $subcategory->img
         ]);
 
         $file_name = public_path("/files/".last(explode("/",$subcategory->img)));
