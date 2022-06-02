@@ -100,7 +100,8 @@ class AlbumsService implements IAlbums
         $album->delete();
 
         return \response()->json([
-            "deleted" => true
+            "deleted" => true,
+            "album" => $album
         ]);
     }
 }

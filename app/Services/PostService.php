@@ -113,7 +113,6 @@ class PostService implements IPosts
          $post->artst()->attach($request->artist_id);
 
 
-
          return \response()->json([
              "created" => true,
              "post" => $post->load("song")
@@ -128,7 +127,31 @@ class PostService implements IPosts
      */
     public function update(Post $post, Request $request): JsonResponse
     {
+        $post = $post->update([
+            "title" => $request->title ?? $post->title,
+            "desc" => $request->desc ?? $post->desc,
+            "slug" => $request->slug ?? $post->slug,
+            "artist" => $request->artist ?? $post->artist,
+            "img" => $request->has("img") ?
+                FileUploader::img($request) : $post->img,
+            "entity" => $request->entity ?? $post->entity,
+            "lyric" => $request->lyric ?? $post->lyric
+        ]);
 
+        $request->has("src") && $post->song()->update([
+            "src" => FileUploader::song($request) ?? $post->song->src
+        ]);
+
+        $request->has("tags") && $post->tags()->async($request->tags);
+
+        $request->has("album") && Album::find($request->album) && $post->album()->async($request->album);
+
+        $request->has("artist_id") && Artist::find($request->artist_id) && $post->artist()->async($request->artist);
+
+        return \response()->json([
+            "updated" => true,
+            "post" => $post->load(["tags","song"])
+        ],Response::HTTP_OK);
     }
 
     /**
