@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\IFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class FileUploader implements IFile
