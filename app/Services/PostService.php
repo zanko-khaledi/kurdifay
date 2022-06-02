@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Interfaces\IPosts;
+use App\Models\Album;
+use App\Models\Artist;
 use App\Models\Post;
 use App\Models\Subcategory;
 use Illuminate\Http\JsonResponse;
@@ -73,7 +75,7 @@ class PostService implements IPosts
      */
     public function findPostById(Post $post): JsonResponse
     {
-        return response()->json($post->load(["song", "tags"]));
+        return response()->json($post->load(["song", "tags","album","artist"]));
     }
 
     /**
@@ -82,43 +84,41 @@ class PostService implements IPosts
      */
     public function create(Request $request): JsonResponse
     {
-        $subcategory = Subcategory::find($request->input("subcategory_id"));
+         $post = $this->post::create([
+            "title" => $request->title,
+            "desc" => $request->desc,
+            "slug" => $request->slug,
+            "artist" => $request->artist,
+            "entity" => $request->entity,
+            "img" => $request->has("img") ? FileUploader::img($request) : null,
+            "lyric" => $request->lyric
+        ]);
 
-        if ($subcategory) {
-            $post = $this->post::create([
-                "subcategory_id" => $subcategory->id,
-                "title" => $request->title,
-                "desc" => $request->desc,
-                "artist" => $request->artist,
-                "slug" => $request->slug,
-                "lyric" => $request->lyric,
-                "entity" => $request->entity,
-                "img" => $request->has("img") ? FileUploader::img($request) : null
-            ]);
+         $request->has("src") && $post->song()->create([
+            "src" => FileUploader::song($request)
+         ]);
 
-            $request->has("tags") && $post->tags()->createMany(array_map(fn($tag) => [
-                "name" => $tag
-            ], $request->tags));
+         $request->has("tags") && $post->tags()->attach($request->tags);
 
-            $request->has("src") && $post->song()->create([
-                "src" => FileUploader::song($request)
-            ]);
+         $request->has("album")
+         &&
+         Album::find($request->album)
+         &&
+         $post->album()->attach($request->album);
+
+         $request->has("artist_id")
+         &&
+         Artist::find($request->artist_id)
+         &&
+         $post->artst()->attach($request->artist_id);
 
 
-            return $post ?
-                \response()->json([
-                    "post" => $post->load(["song", "tags"]),
-                    "created" => true
-                ], Response::HTTP_CREATED)
-                :
-                \response()->json([
-                    "created" => false
-                ], Response::HTTP_BAD_REQUEST);
-        } else {
-            return \response()->json([
-                "message" => "Subcategory not found!",
-            ], Response::HTTP_NOT_FOUND);
-        }
+
+         return \response()->json([
+             "created" => true,
+             "post" => $post->load("song")
+         ]);
+
     }
 
     /**
@@ -128,29 +128,6 @@ class PostService implements IPosts
      */
     public function update(Post $post, Request $request): JsonResponse
     {
-
-
-        $post->update([
-            "title" => $request->title ?? $post->title,
-            "desc" => $request->desc ?? $post->desc,
-            "slug" => $request->slug ?? $post->slug,
-            "artist" => $request->artist ?? $post->artist,
-            "entity" => $request->entity ?? $post->entity,
-            "img" => $request->has("img") ? FileUploader::img($request) : $post->img
-        ]);
-
-        $post->song()->update([
-            "src" => $request->has("src") ? FileUploader::song($request) : $post->song->src
-        ]);
-
-        if ($request->has("tags") && is_array($request->tags)) {
-            $post->tags()->sync($request->tags);
-        }
-
-        return \response()->json([
-            "post" => $post->load(["song", "tags"]),
-            "updated" => true
-        ], Response::HTTP_OK);
 
     }
 

@@ -21,14 +21,20 @@ class Post extends Model
         return $this->hasOne(Song::class);
     }
 
-    public function subcategories(): BelongsTo
+    public function album(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
-        return $this->belongsTo(Subcategory::class);
+        return $this->morphedByMany(Album::class,"postable");
     }
 
-    public function tags(): BelongsToMany
+    public function artist(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {
-        return $this->belongsToMany(Tag::class,"post_tag","post_id","tag_id");
+        return $this->morphedByMany(Artist::class,"postable");
+    }
+
+
+    public function tags(): \Illuminate\Database\Eloquent\Relations\MorphToMany
+    {
+        return $this->morphToMany(Tag::class,"tagable");
     }
 
     public function comment(): HasMany

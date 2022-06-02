@@ -16,9 +16,9 @@ class FileUploader implements IFile
      */
     public static function img(Request $request): ?string
     {
-        $title = $request->title;
+        $name = $request->title ? : $request->name;
         $file = $request->file("img");
-        $file_name = $title.'_'.Str::random().'.'.$file->getClientOriginalExtension();
+        $file_name = $name.'_'.Str::random().'.'.$file->getClientOriginalExtension();
 
         return $file->move(public_path("/files"),$file_name) ?
             asset("/files/".$file_name) : null;

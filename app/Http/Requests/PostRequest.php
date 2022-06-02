@@ -27,7 +27,6 @@ class PostRequest extends FormRequest
     #[ArrayShape(["subcategory_id" => "string", "title" => "string[]", "desc" => "string[]", "slug" => "string[]", "img" => "array", "entity" => "array", "lyric" => "string[]"])] public function rules()
     {
         return [
-            "subcategory_id" => "required",
             "title" => "required",
             "desc" => "nullable | string",
             "slug" => "nullable | string",

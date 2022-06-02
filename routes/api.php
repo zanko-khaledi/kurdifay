@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AlbumsController;
+use App\Http\Controllers\ArtistsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentsController;
@@ -46,42 +48,14 @@ Route::group(["prefix" => "/v1"],function (){
 
     });
 
-    Route::group(["prefix" => "/categories","middleware" => "auth:sanctum"],function (){
-
-        Route::get("/",[CategoryController::class,"index"])
-            ->middleware("is_admin")->name("categories");
-
-        Route::get("/{category}",[CategoryController::class,"show"])
-            ->middleware("is_admin")->name("categories.show");
-
-        Route::post("/create",[CategoryController::class,"store"])
-            ->middleware("is_admin")->name("categories.create");
-
-        Route::patch("/{category}/edit",[CategoryController::class,"update"])
-            ->middleware("is_admin")->name("categories.update");
-
-        Route::delete("/{category}/delete",[CategoryController::class,"destroy"])
-            ->middleware("is_admin")->name("categories.delete");
-    });
-
-    Route::group(["prefix" => "/sub_categories","middleware" => "auth:sanctum"],function (){
-         Route::get("/",[SubcateoryController::class,"index"])
-             ->middleware("is_admin")->name("sub_categories");
-
-         Route::get("/{subcategory}",[SubcateoryController::class,"show"])
-             ->middleware("is_admin")->name("sub_categories.show");
-
-         Route::post("/create",[SubcateoryController::class,"store"])
-             ->middleware("is_admin")->name("sub_categories.create");
-
-         Route::patch("/{subcategory}/edit",[SubcateoryController::class,"update"])
-             ->middleware("is_admin")->name("sub_categories.update");
-
-         Route::delete("/{subcategory}/delete",[SubcateoryController::class,"destroy"])
-             ->middleware("is_admin")->name("sub_categories.delete");
-    });
 
 
+
+    Route::middleware(["auth:sanctum","is_admin"])
+        ->resource("albums", AlbumsController::class);
+
+    Route::middleware(["auth:sanctum","is_admin"])
+        ->resource("artists", ArtistsController::class);
 
     Route::middleware(["auth:sanctum","is_admin"])
         ->resource("posts", PostsController::class);

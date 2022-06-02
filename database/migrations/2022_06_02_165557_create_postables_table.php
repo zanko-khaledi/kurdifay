@@ -13,15 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('subcategories', function (Blueprint $table) {
+        Schema::create('postables', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("category_id")->constrained("categories")
+            $table->foreignId("post_id")->constrained("posts")
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->string("title",128);
-            $table->text("description");
-            $table->string("slug",128);
-            $table->string("img",128)->nullable("true");
+            $table->morphs("postable");
             $table->timestamps();
         });
     }
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subcategories');
+        Schema::dropIfExists('postables');
     }
 };
