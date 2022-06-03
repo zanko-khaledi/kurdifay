@@ -20,7 +20,6 @@ class PostFactory extends Factory
     #[ArrayShape(["subcategory_id" => "int", "title" => "string", "desc" => "string", "slug" => "string", "artist" => "string", "lyric" => "string", "img" => "\Illuminate\Http\Testing\File"])] public function definition()
     {
         return [
-            "subcategory_id" => 1,
             "title" => $this->faker->title,
             "desc" => Str::random(),
             "slug" => $this->faker->slug,

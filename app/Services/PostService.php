@@ -110,13 +110,13 @@ class PostService implements IPosts
          &&
          Artist::find($request->artist_id)
          &&
-         $post->artst()->attach($request->artist_id);
+         $post->artist()->attach($request->artist_id);
 
 
          return \response()->json([
              "created" => true,
              "post" => $post->load("song")
-         ]);
+         ],Response::HTTP_CREATED);
 
     }
 
@@ -127,7 +127,7 @@ class PostService implements IPosts
      */
     public function update(Post $post, Request $request): JsonResponse
     {
-        $post = $post->update([
+         $post->update([
             "title" => $request->title ?? $post->title,
             "desc" => $request->desc ?? $post->desc,
             "slug" => $request->slug ?? $post->slug,
@@ -150,7 +150,7 @@ class PostService implements IPosts
 
         return \response()->json([
             "updated" => true,
-            "post" => $post->load(["tags","song"])
+            "post" => $post->load(["tags","song","album"])
         ],Response::HTTP_OK);
     }
 
