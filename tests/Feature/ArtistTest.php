@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Artist;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -24,6 +25,8 @@ class ArtistTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
 
         Artist::factory()->count(10)->create();
+
+        Tag::factory()->count(40)->create();
     }
 
 
@@ -39,7 +42,8 @@ class ArtistTest extends TestCase
             "name" => "zanko",
             "desc" => Str::random(),
             "slug" => "zanko",
-            "img" => File::fake()->create("avatar.jpg")->size(50)
+            "img" => File::fake()->create("avatar.jpg")->size(50),
+            "tags" => [4,19,32] 
         ])->assertCreated()->assertJson([
             "created" => true
         ])->json();
@@ -93,7 +97,8 @@ class ArtistTest extends TestCase
             "artist" => (int)(Artist::all()->last()->id - 4)
         ]),[
             "name" => "Teddy",
-            "img" => File::fake()->create("avatar.jpg")->size(40)
+            "img" => File::fake()->create("avatar.jpg")->size(40),
+            "tags" => [14,17]
         ])->assertOk()->assertJson([
             "updated" => true
         ]);

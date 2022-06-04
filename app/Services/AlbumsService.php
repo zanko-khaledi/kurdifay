@@ -14,6 +14,8 @@ class AlbumsService implements IAlbums
 
     private Album $album;
 
+    private  const PAGE_SIZE = 15;
+
     public function __construct(Album $album)
     {
         $this->album = $album;
@@ -24,7 +26,16 @@ class AlbumsService implements IAlbums
      */
     public function getAllAlbums(): JsonResponse
     {
-        return response()->json($this->album::with("posts")->get());
+
+        if (request()->has("title")) {
+            $query_string = request()->get("title");
+            $record = $this->album::with("posts")->where("title", "LIKE", "%" . $query_string . "%");
+        } else {
+            $record = $this->album::with("posts")->orderBy("created_at", "DESC")
+                ->paginate(static::PAGE_SIZE);
+        }
+
+        return response()->json($record);
     }
 
     /**
@@ -42,32 +53,27 @@ class AlbumsService implements IAlbums
      */
     public function create(Request $request): JsonResponse
     {
-        $validation = Validator::make($request->all(),[
+        $request->validate([
             "name" => "required",
-            "img" => "nullable | mimes:jpg,jpeg,png,gif",
+            "img" => "nullable | mimes:jpg,jpeg,png,gif | max:10000",
             "slug" => "required",
-            "desc" => "nullable | string"
+            "desc" => "nullable | string",
+            "tags" => "nullable | array"
         ]);
 
-        if(!$validation->fails()){
+        $album = $this->album::create([
+            "name" => $request->name,
+            "img" =>  FileUploader::img($request),
+            "slug" => $request->slug,
+            "desc" => $request->desc
+        ]);
 
-            $album = $this->album::create([
-                "name" => $request->name,
-                "img" =>  FileUploader::img($request),
-                "slug" => $request->slug,
-                "desc" => $request->desc
-            ]);
+        $request->has("tags") && $album->tags()->attach($request->tags);
 
-            return response()->json([
-                "created" => true,
-                "album" => $album
-            ],Response::HTTP_CREATED);
-
-        }else{
-            return \response()->json([
-                "message" => $validation->getMessageBag()
-            ],Response::HTTP_BAD_REQUEST);
-        }
+        return response()->json([
+            "created" => true,
+            "album" => $album
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -77,6 +83,12 @@ class AlbumsService implements IAlbums
      */
     public function update(Album $album, Request $request): JsonResponse
     {
+
+        $request->validate([
+            "img" => "file | mimes:png,jpg,jpeg,gif | max:10000",
+            "tags" => "nullable | array"
+        ]);
+
         $album->update([
             "name" => $request->name ?? $album->name,
             "img" => $request->has("img") ?
@@ -84,6 +96,8 @@ class AlbumsService implements IAlbums
             "slug" => $request->slug ?? $album->slug,
             "desc" => $request->desc ?? $album->desc
         ]);
+
+        $request->has("tags") && $album->tags()->sync($request->tags);
 
         return \response()->json([
             "updated" => true,

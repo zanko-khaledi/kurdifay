@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained("posts")
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->string("email","128")->unique();
+            $table->string("email","128");
             $table->string("name",128);
             $table->boolean("status")->default(0);
             $table->text("comment");

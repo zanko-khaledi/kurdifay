@@ -3,13 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\CommentType;
-use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Post;
-use App\Models\Subcategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 

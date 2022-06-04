@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Album;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Testing\File;
@@ -23,6 +24,7 @@ class AlbumTest extends TestCase
 
         Album::factory()->count(10)->create();
 
+        Tag::factory()->count(30)->create();
     }
 
 
@@ -31,18 +33,22 @@ class AlbumTest extends TestCase
      */
     public function create_album_test()
     {
-         $resposne = $this->post(route("albums.store"),[
-             "name" => "zanko",
-             "desc" => Str::random(),
-             "slug" => "zanko",
-             "img" => File::fake()->create("zanko.avatar.jpg")->size(100),
-         ])->assertCreated()->assertJson([
-             "created" => true
-         ]);
 
-         $this->assertDatabaseHas("albums",[
-             "name" => $resposne["album"]["name"]
-         ]);
+        $this->withDeprecationHandling();
+
+        $resposne = $this->post(route("albums.store"), [
+            "name" => "zanko",
+            "desc" => Str::random(),
+            "slug" => "zanko",
+            "img" => File::fake()->create("zanko.avatar.jpg")->size(100),
+            "tags" => [10,15,22]
+        ])->assertCreated()->assertJson([
+            "created" => true
+        ]);
+
+        $this->assertDatabaseHas("albums", [
+            "name" => $resposne["album"]["name"]
+        ]);
     }
 
 
@@ -55,9 +61,9 @@ class AlbumTest extends TestCase
         $this->get(route("albums.index"))
             ->assertOk()->json();
 
-        $this->assertGreaterThan(0,count(Album::all()));
+        $this->assertGreaterThan(0, count(Album::all()));
 
-        $this->assertDatabaseCount("albums",Album::all()->count());
+        $this->assertDatabaseCount("albums", Album::all()->count());
     }
 
     /**
@@ -67,12 +73,11 @@ class AlbumTest extends TestCase
     {
 
 
-        $this->get(route("albums.show",[
+        $this->get(route("albums.show", [
             "album" => Album::all()->first()->id
         ]))->assertOk()->assertJson([
             "name" => Album::all()->first()->name
         ])->json();
-
     }
 
 
@@ -82,18 +87,18 @@ class AlbumTest extends TestCase
     public function  update_albums_test()
     {
 
-        $response = $this->patch(route("albums.update",[
+        $response = $this->patch(route("albums.update", [
             "album" => Album::all()->last()->id
-        ]),[
-            "name" => "Teddy"
+        ]), [
+            "name" => "Teddy",
+            "tags" => [18,14]
         ])->assertOk()->assertJson([
             "updated" => true,
         ])->json();
 
-        $this->assertDatabaseHas("albums",[
+        $this->assertDatabaseHas("albums", [
             "name" => $response["album"]["name"]
         ]);
-
     }
 
     /**
@@ -102,17 +107,16 @@ class AlbumTest extends TestCase
     public function delete_album_test()
     {
 
-        $response = $this->delete(route("albums.destroy",[
+        $response = $this->delete(route("albums.destroy", [
             "album" => Album::all()->last()->id
         ]))->assertOk()->assertJson([
             "deleted" => true
         ])->json();
 
-        $this->assertDatabaseMissing("albums",[
+        $this->assertDatabaseMissing("albums", [
             "name" => $response["album"]["name"]
         ]);
 
-        $this->assertDatabaseCount("albums",Album::all()->count());
+        $this->assertDatabaseCount("albums", Album::all()->count());
     }
-
 }

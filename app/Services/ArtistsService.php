@@ -11,6 +11,7 @@ class ArtistsService implements \App\Interfaces\IArtists
 {
 
     private Artist $artist;
+    private  const PAGE_SIZE = 15;
 
     public function __construct(Artist $artist)
     {
@@ -22,7 +23,15 @@ class ArtistsService implements \App\Interfaces\IArtists
      */
     public function getAllArtists(): JsonResponse
     {
-        return response()->json($this->artist::with("posts")->get());
+        if(request()->has("artist")){
+            $query_string = request()->get("artist");
+            $record = $this->artist::with("posts")->where("artist","LIKE","%".$query_string."%");
+        }else{
+            $record = $this->artist::with("posts")->orderBy("created_at","DESC")
+              ->paginate(static::PAGE_SIZE);
+        }
+
+        return response()->json($record);
     }
 
     /**
@@ -44,7 +53,8 @@ class ArtistsService implements \App\Interfaces\IArtists
             "name" => "required",
             "desc" => "nullable | string",
             "slug" => "required",
-            "img" => "nullable | mimes:jpg,png,gif | max : 10000"
+            "img" => "nullable | mimes:jpg,png,gif | max : 10000",
+            "tags" => "nullable | array"
         ]);
 
 
@@ -54,6 +64,9 @@ class ArtistsService implements \App\Interfaces\IArtists
             "slug" => $validation["slug"],
             "img" => $request->has("img") ? FileUploader::img($request) : null
         ]);
+
+       $request->has("tags") && $artist->tags()->attach($request->tags);
+    
 
         return response()->json([
             "created" => true,
@@ -70,7 +83,8 @@ class ArtistsService implements \App\Interfaces\IArtists
     {
 
         $request->validate([
-            "img" => "nullable | max: 10000 | mimes:jpg,jpeg,png,gif"
+            "img" => "nullable | max: 10000 | mimes:jpg,jpeg,png,gif",
+            "tags" => "nullable | array"
         ]);
 
         $artist->update([
@@ -79,6 +93,8 @@ class ArtistsService implements \App\Interfaces\IArtists
             "slug" => $request->slug ?? $artist->slug,
             "img" => $request->has("img") ? FileUploader::img($request) : $artist->img
         ]);
+
+        $request->has("tags") && $artist->tags()->sync($request->tags);
 
 
         return \response()->json([

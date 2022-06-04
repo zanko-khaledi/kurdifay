@@ -53,7 +53,7 @@ class PostsTest extends TestCase
             "artist" => "zanko",
             "img" => File::fake()->create("avatar.jpg")->size(30),
             "src" => File::fake()->create("avatar.mp3")->size(30),
-            "tags" => [1, 2],
+            "tags" => [22, 29],
             "album" => Album::all()->first()->id,
             "artist_id" => Artist::all()->first()->id
         ])->assertCreated()->assertJson([
